@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
+import matplotlib.pyplot as plt
 from collections import Counter
 
 # Download VADER if needed
@@ -59,5 +60,35 @@ if feedbacks:
     st.subheader("Sentiment Distribution")
     st.bar_chart(pd.DataFrame.from_dict(sentiment_counts, orient='index'))
 
-else:
-    st.write("Please upload a CSV or enter some feedback texts to analyze.")
+    # Additional charts
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Bar Chart")
+        fig, ax = plt.subplots()
+        labels = list(sentiment_counts.keys())
+        counts = list(sentiment_counts.values())
+        colors = {'Positive': 'green', 'Negative': 'red', 'Neutral': 'gray'}
+        color_list = [colors.get(label, 'blue') for label in labels]
+        ax.bar(labels, counts, color=color_list)
+        ax.set_title('Sentiment Distribution')
+        ax.set_xlabel('Sentiment')
+        ax.set_ylabel('Count')
+        st.pyplot(fig)
+
+    with col2:
+        st.subheader("Pie Chart")
+        fig2, ax2 = plt.subplots()
+        ax2.pie(counts, labels=labels, autopct='%1.1f%%', colors=color_list)
+        ax2.set_title('Sentiment Distribution')
+        st.pyplot(fig2)
+
+    # Histogram of scores
+    st.subheader("Score Distribution")
+    fig3, ax3 = plt.subplots()
+    scores = [r['Score'] for r in results]
+    ax3.hist(scores, bins=10, color='skyblue', edgecolor='black')
+    ax3.set_title('Distribution of Sentiment Scores')
+    ax3.set_xlabel('Compound Score')
+    ax3.set_ylabel('Frequency')
+    st.pyplot(fig3)
